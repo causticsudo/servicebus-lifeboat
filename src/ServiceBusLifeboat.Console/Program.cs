@@ -1,6 +1,7 @@
 ﻿using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
 using ServiceBusLifeboat.Domain.Exceptions;
+using ServiceBusLifeboat.Domain.Extensions;
 using static System.Console;
 
 namespace ServiceBusLifeboat.Console;
@@ -11,32 +12,86 @@ internal class Program
     private static ServiceBusAdministrationClient _adminClient;
     private static ServiceBusClient _client;
     private static List<QueueProperties> _inMemoryQueues;
-    private static QueueProperties _selectedQueueInMemory;
+    private static ServiceBusSender _queueSender;
+    private static List<ulong> _selectedSequenceNumbersInMemory;
+    private static List<ulong> _sequenceNumbersFail;
 
-    public static Task Main(string[] args)
+    public Program()
     {
         WriteLine("[Namespace] Connection String:");
 
         _namespaceConnectionString = ReadLine() ?? throw new ArgumentException("value cannot be null");
 
         TryConnectToServiceBus();
+    }
 
-        ShowNamespaceQueuesSummary();
+    public static async Task Main(string[] args)
+    {
+        _selectedSequenceNumbersInMemory = new List<ulong>();
+        _sequenceNumbersFail = new List<ulong>();
+        bool isEndExecution;
+        do
+        {
+            ShowNamespaceQueuesSummary();
+            SelectQueueToManage();
 
-        SelectQueueToManage();
+            bool isUnscheduleConfirmed;
+            do
+            {
+                InsertSequencesNumber();
+                ShowSelectedSequencesNumber();
+                ShowConfirmationOptions();
+                isUnscheduleConfirmed = Convert.ToBoolean(ReadLine());
+            } while (!isUnscheduleConfirmed);
 
-//IEnumerable<ServiceBusReceivedMe// foreach (ServiceBusReceivedMessage message in messages)
-        // {
-        //     Console.WriteLine($"Removendo {message.SequenceNumber}" ); 
-        //      await sender.CancelScheduledMessageAsync(message.SequenceNumber);
-        //     Console.WriteLine($"removido");
-        // }ssage> messages = await receiver.PeekMessagesAsync(maxMessages, maxWaitTime);
+            await UnscheduleMessages();
 
-        // var sender = _client.CreateSender(selectedIndex);
-        //
-        // await sender.CancelScheduledMessageAsync(16231814);
+            ShowFailedMessages();
 
-        return Task.CompletedTask;
+            ShowEndExecutionOptions();
+            isEndExecution =  Convert.ToBoolean(ReadLine());
+        } while (isEndExecution);
+    }
+
+    private static async Task UnscheduleMessages()
+    {
+        foreach (var sequenceNumber in _selectedSequenceNumbersInMemory)
+        {
+            WriteLine($"Unscheduling {sequenceNumber}" );
+            try
+            {
+                await _queueSender.CancelScheduledMessageAsync((long)sequenceNumber);
+                WriteLine($"Message Unscheduled");
+            }
+            catch
+            {
+                WriteLine($"Fail to unschedule message");
+                _sequenceNumbersFail.Add(sequenceNumber);
+            }
+        }
+    }
+
+    private static void InsertSequencesNumber()
+    {
+        WriteLine("Enter a comma-separated list of sequence numbers:");
+        WriteLine("Ex: 127531,2375183,321753");
+        var sequenceNumberInput = ReadLine() ?? throw new ArgumentException("value cannot be null");
+        _selectedSequenceNumbersInMemory = sequenceNumberInput.ConvertToLongList();
+    }
+
+    private static void ShowConfirmationOptions()
+    {
+        WriteLine("0 - yes");
+        WriteLine("1 - no");
+    }
+
+    private static void ShowSelectedSequencesNumber()
+    {
+        WriteLine("Confirm that you want to delete all these sequence numbers");
+        foreach (var sequenceNumber in _selectedSequenceNumbersInMemory)
+        {
+            WriteLine($"{sequenceNumber}");
+        }
     }
 
     private static void SelectQueueToManage()
@@ -51,23 +106,23 @@ internal class Program
             throw new ArgumentOutOfRangeException($"Invalid queue range, use a value between (0-{inMemoryQueuesCount--})");
         }
 
-        _selectedQueueInMemory = _inMemoryQueues[selectedIndex];
+        _queueSender = _client.CreateSender(_inMemoryQueues[selectedIndex].Name);
     }
 
-    private async static void ShowNamespaceQueuesSummary()
+    private static async void ShowNamespaceQueuesSummary()
     {
-        int queueIndex = 0;
+        var queueIndex = 0;
         var queues = _adminClient.GetQueuesAsync();
 
-        await foreach (QueueProperties queue in queues)
+        await foreach (var queue in queues)
         {
             var queueName = queue.Name;
 
-            var runtimeQueueSumary =  _adminClient.GetQueueRuntimePropertiesAsync(queueName).Result.Value;
+            var runtimeQueueSummary =  _adminClient.GetQueueRuntimePropertiesAsync(queueName).Result.Value;
 
-            var totalActiveMessagesCount = runtimeQueueSumary.ActiveMessageCount;
-            var totalScheduledMessagesCount = runtimeQueueSumary.ScheduledMessageCount;
-            var totalDeadLetterMessagesCount = runtimeQueueSumary.DeadLetterMessageCount;
+            var totalActiveMessagesCount = runtimeQueueSummary.ActiveMessageCount;
+            var totalScheduledMessagesCount = runtimeQueueSummary.ScheduledMessageCount;
+            var totalDeadLetterMessagesCount = runtimeQueueSummary.DeadLetterMessageCount;
 
             WriteLine($"({queueIndex}){queue.Name} - | A({totalActiveMessagesCount}) | S({totalScheduledMessagesCount} | DLQ({totalDeadLetterMessagesCount})) \n\n");
 
@@ -87,9 +142,24 @@ internal class Program
 
             WriteLine("Connected !");
         }
-        catch (Exception e)
+        catch
         {
             throw new InvalidConnectionStringException();
         }
+    }
+
+    private static void ShowFailedMessages()
+    {
+        WriteLine("The messages below could not be unscheduled");
+        foreach (var sequenceNumber in _sequenceNumbersFail)
+        {
+            WriteLine($"{sequenceNumber}");
+        }
+    }
+
+    private static void ShowEndExecutionOptions()
+    {
+        WriteLine("0 - exit");
+        WriteLine("1 - back to menu");
     }
 }
