@@ -16,23 +16,22 @@ internal class Program
     private static List<ulong> _selectedSequenceNumbersInMemory;
     private static List<ulong> _sequenceNumbersFail;
 
-    public Program()
+    public static async Task Main(string[] args)
     {
         WriteLine("[Namespace] Connection String:");
 
         _namespaceConnectionString = ReadLine() ?? throw new ArgumentException("value cannot be null");
 
         TryConnectToServiceBus();
-    }
 
-    public static async Task Main(string[] args)
-    {
         _selectedSequenceNumbersInMemory = new List<ulong>();
         _sequenceNumbersFail = new List<ulong>();
+
         bool isEndExecution;
         do
         {
-            ShowNamespaceQueuesSummary();
+            await ShowNamespaceQueuesSummary();
+
             SelectQueueToManage();
 
             bool isUnscheduleConfirmed;
@@ -41,7 +40,7 @@ internal class Program
                 InsertSequencesNumber();
                 ShowSelectedSequencesNumber();
                 ShowConfirmationOptions();
-                isUnscheduleConfirmed = Convert.ToBoolean(ReadLine());
+                isUnscheduleConfirmed = Convert.ToBoolean(Convert.ToInt32(ReadLine()));
             } while (!isUnscheduleConfirmed);
 
             await UnscheduleMessages();
@@ -49,7 +48,7 @@ internal class Program
             ShowFailedMessages();
 
             ShowEndExecutionOptions();
-            isEndExecution =  Convert.ToBoolean(ReadLine());
+            isEndExecution =  Convert.ToBoolean(Convert.ToInt32(ReadLine()));
         } while (isEndExecution);
     }
 
@@ -81,13 +80,13 @@ internal class Program
 
     private static void ShowConfirmationOptions()
     {
-        WriteLine("0 - yes");
-        WriteLine("1 - no");
+        WriteLine("0 - no");
+        WriteLine("1 - yes");
     }
 
     private static void ShowSelectedSequencesNumber()
     {
-        WriteLine("Confirm that you want to delete all these sequence numbers");
+        WriteLine("Confirm that you want to unschedule these sequence numbers");
         foreach (var sequenceNumber in _selectedSequenceNumbersInMemory)
         {
             WriteLine($"{sequenceNumber}");
@@ -103,13 +102,16 @@ internal class Program
 
         if (selectedIndex > inMemoryQueuesCount)
         {
-            throw new ArgumentOutOfRangeException($"Invalid queue range, use a value between (0-{inMemoryQueuesCount--})");
+            Write($"Invalid queue range, use a value between (0-{inMemoryQueuesCount--})\n");
+
+            SelectQueueToManage();
+            return;
         }
 
         _queueSender = _client.CreateSender(_inMemoryQueues[selectedIndex].Name);
     }
 
-    private static async void ShowNamespaceQueuesSummary()
+    private static async Task ShowNamespaceQueuesSummary()
     {
         var queueIndex = 0;
         var queues = _adminClient.GetQueuesAsync();
@@ -124,7 +126,7 @@ internal class Program
             var totalScheduledMessagesCount = runtimeQueueSummary.ScheduledMessageCount;
             var totalDeadLetterMessagesCount = runtimeQueueSummary.DeadLetterMessageCount;
 
-            WriteLine($"({queueIndex}){queue.Name} - | A({totalActiveMessagesCount}) | S({totalScheduledMessagesCount} | DLQ({totalDeadLetterMessagesCount})) \n\n");
+            WriteLine($"({queueIndex}){queue.Name} - | A({totalActiveMessagesCount}) | S({totalScheduledMessagesCount} | DLQ({totalDeadLetterMessagesCount}))");
 
             queueIndex++;
         }
@@ -138,9 +140,9 @@ internal class Program
         {
             _adminClient = new(_namespaceConnectionString);
             _client = new(_namespaceConnectionString);
-            _inMemoryQueues = null;
+            _inMemoryQueues = new();
 
-            WriteLine("Connected !");
+            WriteLine("Connected to namespace !");
         }
         catch
         {
