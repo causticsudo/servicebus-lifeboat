@@ -1,43 +1,95 @@
 ﻿using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
+using ServiceBusLifeboat.Domain.Exceptions;
+using static System.Console;
 
-namespace ServiceBusPoc;
+namespace ServiceBusLifeboat.Console;
 
 internal class Program
 {
-    public static async Task Main(string[] args)
+    private static string _namespaceConnectionString; 
+    private static ServiceBusAdministrationClient _adminClient;
+    private static ServiceBusClient _client;
+    private static List<QueueProperties> _inMemoryQueues;
+    private static QueueProperties _selectedQueueInMemory;
+
+    public static Task Main(string[] args)
     {
-        Console.WriteLine("[Namespace] Connection String:"); 
-        var namespaceConnectionString = "Endpoint=sb://sb-credit-alias-staging.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=teX9nL0aIm/Ee+GpDuz/qV/yquZw18VI4gT5zGfbXT4=";
+        WriteLine("[Namespace] Connection String:");
 
-        var adminClient = new ServiceBusAdministrationClient(namespaceConnectionString);
-        var client = new ServiceBusClient(namespaceConnectionString);
-       
+        _namespaceConnectionString = ReadLine() ?? throw new ArgumentException("value cannot be null");
 
-        
-        Console.WriteLine("Queue Name:"); 
-        var queueName = "credit-installment-commands-queue";
+        TryConnectToServiceBus();
 
-        var queue = await adminClient.GetQueueRuntimePropertiesAsync(queueName);
+        ShowNamespaceQueuesSummary();
 
-        Console.WriteLine(
-            $"{queue.Value.Name} | total({queue.Value.TotalMessageCount}) | a({queue.Value.ActiveMessageCount}) | sch({queue.Value.ScheduledMessageCount} | dlq({queue.Value.DeadLetterMessageCount})) \n\n");
-        
-        
-        ServiceBusReceiver receiver = client.CreateReceiver(queueName);
-        int maxMessages = 10; // Número máximo de mensagens para receber
-        var maxWaitTime = 5000; // Tempo máximo de espera para receber mensagens
+        SelectQueueToManage();
 
-        //IEnumerable<ServiceBusReceivedMessage> messages = await receiver.PeekMessagesAsync(maxMessages, maxWaitTime);
-        
-        var sender = client.CreateSender(queueName);
-        await sender.CancelScheduledMessageAsync(16231814);
-        
-        // foreach (ServiceBusReceivedMessage message in messages)
+//IEnumerable<ServiceBusReceivedMe// foreach (ServiceBusReceivedMessage message in messages)
         // {
         //     Console.WriteLine($"Removendo {message.SequenceNumber}" ); 
         //      await sender.CancelScheduledMessageAsync(message.SequenceNumber);
         //     Console.WriteLine($"removido");
-        // }
+        // }ssage> messages = await receiver.PeekMessagesAsync(maxMessages, maxWaitTime);
+
+        // var sender = _client.CreateSender(selectedIndex);
+        //
+        // await sender.CancelScheduledMessageAsync(16231814);
+
+        return Task.CompletedTask;
+    }
+
+    private static void SelectQueueToManage()
+    {
+        var inMemoryQueuesCount = _inMemoryQueues.Count;
+
+        WriteLine("Select Queue:");
+        var selectedIndex = Convert.ToInt32(ReadLine());
+
+        if (selectedIndex > inMemoryQueuesCount)
+        {
+            throw new ArgumentOutOfRangeException($"Invalid queue range, use a value between (0-{inMemoryQueuesCount--})");
+        }
+
+        _selectedQueueInMemory = _inMemoryQueues[selectedIndex];
+    }
+
+    private async static void ShowNamespaceQueuesSummary()
+    {
+        int queueIndex = 0;
+        var queues = _adminClient.GetQueuesAsync();
+
+        await foreach (QueueProperties queue in queues)
+        {
+            var queueName = queue.Name;
+
+            var runtimeQueueSumary =  _adminClient.GetQueueRuntimePropertiesAsync(queueName).Result.Value;
+
+            var totalActiveMessagesCount = runtimeQueueSumary.ActiveMessageCount;
+            var totalScheduledMessagesCount = runtimeQueueSumary.ScheduledMessageCount;
+            var totalDeadLetterMessagesCount = runtimeQueueSumary.DeadLetterMessageCount;
+
+            WriteLine($"({queueIndex}){queue.Name} - | A({totalActiveMessagesCount}) | S({totalScheduledMessagesCount} | DLQ({totalDeadLetterMessagesCount})) \n\n");
+
+            queueIndex++;
+        }
+
+        _inMemoryQueues =  queues.ToBlockingEnumerable().ToList();
+    }
+
+    private static void TryConnectToServiceBus()
+    {
+        try
+        {
+            _adminClient = new(_namespaceConnectionString);
+            _client = new(_namespaceConnectionString);
+            _inMemoryQueues = null;
+
+            WriteLine("Connected !");
+        }
+        catch (Exception e)
+        {
+            throw new InvalidConnectionStringException();
+        }
     }
 }

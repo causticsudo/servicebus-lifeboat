@@ -11,4 +11,8 @@
     <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.14.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ServiceBusLifeboat.Domain\ServiceBusLifeboat.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
