@@ -19,8 +19,4 @@
     <ProjectReference Include="..\ServiceBusLifeboat.Domain\ServiceBusLifeboat.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Commands\Namespace" />
-  </ItemGroup>
-
 </Project>

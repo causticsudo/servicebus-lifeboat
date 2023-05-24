@@ -21,10 +21,20 @@ public class ConnectOnNamespace : Command
         this.AddOptions(new Option[]
         {
             new Option<string>(
-                name: "--namespace",
+                aliases: new []{ "--namespace", "--connection-string"},
                 description: "Connect to an azure service bus namespace, using a connection string")
         });
 
         Handler = CommandHandler.Create<string>(handler.Handle);
+
+        AddValidator(symbol =>
+        {
+            if (symbol.Children.Count == 0)
+            {
+                this.InvokeAsync("--help").Wait();
+
+                throw new InvalidOperationException("No arguments were provided. Use --help to get assistance.");
+            }
+        });
     }
 }
