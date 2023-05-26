@@ -3,7 +3,7 @@ name: Build and Publish .Net Core
 on:
   push:
     branches:
-      - main
+      - requirement/pipeline-build
   workflow_dispatch:
 
 jobs:
