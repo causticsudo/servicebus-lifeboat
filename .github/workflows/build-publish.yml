@@ -16,19 +16,29 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: '7.0.x'
           include-prerelease: true
 
       - name: Build with dotnet
-        working-directory: ./src
+        working-directory: ./src/ServiceBusLifeboat.Console
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        working-directory: ./src
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        working-directory: ./src/ServiceBusLifeboat.Console
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/servicebus-win -r win-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true
 
-      - name: Upload artifact for deployment job
+      - name: Upload artifact for deployment job (Windows Version)
         uses: actions/upload-artifact@v2
         with:
-          name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          name: .servicebus-windows
+          path: ${{env.DOTNET_ROOT}}/servicebus-win
+
+      - name: dotnet publish
+        working-directory: ./src/ServiceBusLifeboat.Console
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/servicebus-lin -r linux-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true
+
+      - name: Upload artifact for deployment job (Linux Version)
+        uses: actions/upload-artifact@v2
+        with:
+          name: .servicebus-linux
+          path: ${{env.DOTNET_ROOT}}/servicebus-lin
