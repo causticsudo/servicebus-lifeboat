@@ -1,8 +1,8 @@
 using System.CommandLine;
 using System.CommandLine.Binding;
-using sblboat.Model;
+using ServiceBusLifeboat.Cli.Model;
 
-namespace sblboat.Binders;
+namespace ServiceBusLifeboat.Cli.Binders;
 
 public class ServiceBusNamespaceBinder : BinderBase<ServiceBusNamespace>
 {

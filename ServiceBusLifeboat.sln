@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceBusLifeboat.UnitTest
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{62F174AD-671E-47F5-8126-A76F40434D76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sblboat", "src\sblboat\sblboat.csproj", "{503CA8CD-27C5-44B4-876C-B593DC5B2B0A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceBusLifeboat.Cli", "src\ServiceBusLifeboat.Cli\ServiceBusLifeboat.Cli.csproj", "{503CA8CD-27C5-44B4-876C-B593DC5B2B0A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

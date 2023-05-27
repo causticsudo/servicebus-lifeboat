@@ -1,4 +1,4 @@
-namespace sblboat.Extensions;
+namespace ServiceBusLifeboat.Cli.Extensions;
 
 public static class StringExtensions
 {

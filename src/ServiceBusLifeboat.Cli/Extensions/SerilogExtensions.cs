@@ -1,9 +1,8 @@
-using sblboat.Themes;
 using Serilog;
-using ConsoleColors = System.ConsoleColor;
+using ServiceBusLifeboat.Cli.Themes;
 using ILogger = Serilog.ILogger;
 
-namespace sblboat.Extensions;
+namespace ServiceBusLifeboat.Cli.Extensions;
 
 public static class SerilogExtensions
 {

@@ -3,13 +3,13 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
-using sblboat.Binders;
-using sblboat.DependencyInjection;
-using sblboat.Model;
 using Serilog;
-using sblboat.Extensions;
+using ServiceBusLifeboat.Cli.Binders;
+using ServiceBusLifeboat.Cli.DependencyInjection;
+using ServiceBusLifeboat.Cli.Extensions;
+using ServiceBusLifeboat.Cli.Model;
 
-namespace sblboat.Commands.Namespace.SubCommands;
+namespace ServiceBusLifeboat.Cli.Commands.Namespace.SubCommands;
 
 public class ConnectCommand : Command
 {

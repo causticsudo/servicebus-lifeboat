@@ -1,7 +1,7 @@
 using System.CommandLine.Binding;
 using Serilog;
 
-namespace sblboat.DependencyInjection;
+namespace ServiceBusLifeboat.Cli.DependencyInjection;
 
 public class SerilogBinder : BinderBase<ILogger>
 {

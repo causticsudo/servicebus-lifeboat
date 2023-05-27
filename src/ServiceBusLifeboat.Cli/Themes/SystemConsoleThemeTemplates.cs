@@ -1,7 +1,7 @@
 using Serilog.Sinks.SystemConsole.Themes;
 using static System.ConsoleColor;
 
-namespace sblboat.Themes;
+namespace ServiceBusLifeboat.Cli.Themes;
 
 public static class SystemConsoleThemeTemplates
 {

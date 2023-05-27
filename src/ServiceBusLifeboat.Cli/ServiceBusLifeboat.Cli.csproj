@@ -5,8 +5,9 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RuntimeIdentifier>win-x64</RuntimeIdentifier> <!-- para Windows -->
-        <RuntimeIdentifier>linux-x64</RuntimeIdentifier> <!-- para Linux -->
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+        <AssemblyName>sblboat</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>

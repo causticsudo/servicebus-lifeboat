@@ -1,7 +1,7 @@
 ﻿using System.CommandLine;
-using sblboat.Commands.Namespace;
+using ServiceBusLifeboat.Cli.Commands.Namespace;
 
-namespace sblboat;
+namespace ServiceBusLifeboat.Cli;
 
 internal class Program
 {

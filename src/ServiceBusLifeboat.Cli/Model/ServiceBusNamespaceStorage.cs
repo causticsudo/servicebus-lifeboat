@@ -1,4 +1,4 @@
-namespace sblboat.Model;
+namespace ServiceBusLifeboat.Cli.Model;
 
 public class ServiceBusNamespaceStorage
 {
