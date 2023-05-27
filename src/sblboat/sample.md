@@ -1,3 +1,4 @@
+````csharp
 using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
 using ServiceBusLifeboat.Domain.Exceptions;
@@ -164,3 +165,4 @@ public class QueueInfo
         WriteLine("1 - back to menu");
     }
 }
+````
