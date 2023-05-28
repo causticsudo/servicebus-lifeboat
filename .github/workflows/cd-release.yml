@@ -1,4 +1,4 @@
-name: Upload artifact and Create Release
+name: Upload artifact | Create Release
 
 on:
   push:
@@ -13,10 +13,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      # Create version from .git/GitVersion.yml
       - name: Get version from GitVersion.yml
         id: get_version
         run: echo "::set-output name=version::$(cat .github/GitVersion.yml | yq -r .version)"
 
+      # Create github release
       - name: Create Github Release
         id: create_release
         uses: actions/create-release@v1
@@ -28,36 +30,28 @@ jobs:
           draft: false
           prerelease: false
 
+      #  Publish to windows x64 and make .zip folder
+      - name: Run dotnet publish for Windows
+        working-directory: ${{env.App_Working_Directory}}
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publish/windows -r win-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -p:Version=${{ steps.get_version.outputs.version }}
+
+      #  Publish to linux x64 and make .zip folder
+      - name: Run dotnet publish for Linux
+        working-directory: ${{env.App_Working_Directory}}
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publish/linux -r linux-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -p:Version=${{ steps.get_version.outputs.version }}
+
+      # Upload linux artfact
       - name: Upload linux binary artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: .sblboat_cli_linux
           path: ${{env.DOTNET_ROOT}}/publish/linux
 
+      # Upload windows artfact
       - name: Upload windows binary artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-release-asset@v1
         with:
           name: .sblboat_cli_windows
           path: ${{env.DOTNET_ROOT}}/publish/windows
-
-      - name: Attach linux binary artifacts to release
-        id: attach_artifacts
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.SBLBOAT_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/${{ steps.get_version.outputs.version }}/linux/.sblboat_cli_linux
-          asset_name: sblboat.sh
-          asset_content_type: application/octet-stream
-
-      - name: Attach windows binary artifacts to release
-        id: attach_windows_artifacts
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.SBLBOAT_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/${{ steps.get_version.outputs.version }}/windows/sblboat_cli.exe
-          asset_name: sblboat_cli.exe
-          asset_content_type: application/octet-stream
