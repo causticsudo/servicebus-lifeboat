@@ -9,6 +9,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    env:
+      Solution_Name: ServiceBusLifeboat
+      App_Working_Directory: ./src/ServiceBusLifeboat.Cli
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
