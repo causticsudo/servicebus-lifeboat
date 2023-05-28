@@ -25,7 +25,6 @@ jobs:
           include-prerelease: true
 
       - name: Restore dependencies
-        working-directory: ${{env.DOTNET_ROOT}}
         run: dotnet restore
 
       - name: Run dotnet build
