@@ -49,7 +49,7 @@ public class ConnectCommand : Command
                     return null!;
                 }
 
-                if (ValidateConnectionString(connectionString))
+                if (ValidateConnectionStringPattern(connectionString))
                 {
                     return connectionString;
                 }
