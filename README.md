@@ -1,7 +1,7 @@
-# Service Bus CLI
+# Service Bus Lifeboat
 
 <h4  align="center">
-	🔍 Service Bus CLI 
+	🔍 Service Bus Lifeboat
 </h4>
 
 <p  align="center">
