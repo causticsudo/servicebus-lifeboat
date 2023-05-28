@@ -48,20 +48,22 @@ jobs:
       - name: Zip linux-x64
         run: (cd ${{env.DOTNET_ROOT}}/publish/linux ; zip -r ${{env.Solution_Name}}_linux-x64 *)
 
-      # Upload linux artfact
+      # Upload linux artifact
       - name: Upload linux binary artifact
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SBLBOAT_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{env.DOTNET_ROOT}}/publish/linux/${{env.Solution_Name}}_linux-x64.zip
           asset_name: ${{env.Solution_Name}}_linux-x64.zip
           asset_content_type: application/zip
 
-      # Upload windows artfact
+      # Upload windows artifact
       - name: Upload windows binary artifact
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.SBLBOAT_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{env.DOTNET_ROOT}}/publish/windows/${{env.Solution_Name}}_win-x64.zip
