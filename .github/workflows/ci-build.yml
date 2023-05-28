@@ -4,40 +4,70 @@ on:
   push:
     branches-ignore:
       - '!hotfix/*'
-      - 'main'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     env:
+      Solution_Name: ServiceBusLifeboat
       Unit_Tests_Working_Directory: ./tests/ServiceBusLifeboat.UnitTests
       App_Working_Directory: ./src/ServiceBusLifeboat.Cli
 
     steps:
+      # Repository checkout
       - name: Checkout
         uses: actions/checkout@v2
 
+      # Create version from .git/GitVersion.yml
+      - name: Get version from GitVersion.yml 
+        id: get_version
+        run: echo "::set-output name=version::$(cat .github/GitVersion.yml | yq -r .version)"
+
+      # Install especific dotnet version
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '6.0.x'
           include-prerelease: true
 
+      # Restore all dependencies from solution
       - name: Restore dependencies
         run: dotnet restore
 
+      # Compile all projects using solution
       - name: Run dotnet build
         run: dotnet build
 
+      # Run unit tests from unit tests csproj
       - name: Run dotnet tests
         working-directory: ${{env.Unit_Tests_Working_Directory}}
         run: dotnet test
 
+      #  Publish to windows x64
       - name: Run dotnet publish for Windows
         working-directory: ${{env.App_Working_Directory}}
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publish/windows -r win-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publish/windows -r win-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -p:Version=${{ steps.get_version.outputs.version }}
 
+      #  Publish to linux x64
       - name: Run dotnet publish for Linux
         working-directory: ${{env.App_Working_Directory}}
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publish/linux -r linux-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publish/linux -r linux-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -p:Version=${{ steps.get_version.outputs.version }}
+
+      # Upload linux artfact
+      - name: Upload linux binary artifact
+        uses: actions/upload-artifact@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: ${{env.Solution_Name}}_linux
+          path: ${{env.DOTNET_ROOT}}/publish/linux/
+
+      # Upload windows artfact
+      - name: Upload windows binary artifact
+        uses: actions/upload-artifact@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: ${{env.Solution_Name}}_windows
+          path: ${{env.DOTNET_ROOT}}/publish/windows/
