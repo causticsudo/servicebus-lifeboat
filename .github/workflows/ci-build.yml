@@ -43,7 +43,7 @@ jobs:
       # Run unit tests from unit tests csproj and generate coverage reports
       - name: Run dotnet tests and generate coverage reports
         working-directory: ${{env.Unit_Tests_Working_Directory}}
-        run: dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat="opencover%2ccobertura" /p:CoverletOutput=./TestResults/
+        run: dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover,cobertura /p:CoverletOutput=./TestResults/
 
       # Publish coverage reports as artifacts
       - name: Publish coverage reports
@@ -58,7 +58,7 @@ jobs:
 
       # Generate HTML report using ReportGenerator
       - name: Generate HTML coverage report
-        run: reportgenerator "-reports:${{env.Unit_Tests_Working_Directory}}/TestResults/*.opencover.xml" "-targetdir:coverage" "-reporttypes:Html"
+        run: reportgenerator "-reports:${{env.Unit_Tests_Working_Directory}}/TestResults/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:Html"
 
       #  Publish to windows x64
       - name: Run dotnet publish for Windows
