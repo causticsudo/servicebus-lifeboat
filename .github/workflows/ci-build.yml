@@ -1,0 +1,44 @@
+name: Build Tests and Publish .NET Core
+
+on:
+  push:
+    branches-ignore:
+      - '!hotfix/*'
+      - 'main'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      Unit_Tests_Working_Directory: ./tests/ServiceBusLifeboat.UnitTests
+      App_Working_Directory: ./src/ServiceBusLifeboat.Cli
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+          include-prerelease: true
+
+      - name: Restore dependencies
+        working-directory: ${{env.DOTNET_ROOT}}
+        run: dotnet restore
+
+      - name: Run dotnet build
+        run: dotnet build
+
+      - name: Run dotnet tests
+        working-directory: ${{env.Unit_Tests_Working_Directory}}
+        run: dotnet test
+
+      - name: Run dotnet publish for Windows
+        working-directory: ${{env.App_Working_Directory}}
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publish/windows -r win-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true
+
+      - name: Run dotnet publish for Linux
+        working-directory: ${{env.App_Working_Directory}}
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publish/linux -r linux-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true

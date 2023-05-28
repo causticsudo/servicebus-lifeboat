@@ -1,44 +1,55 @@
-name: Build and Publish .Net Core
-
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up .NET Core
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '7.0.x'
-          include-prerelease: true
-
-      - name: Build with dotnet
-        working-directory: ./src/ServiceBusLifeboat.Console
-        run: dotnet build --configuration Release
-
-      - name: dotnet publish
-        working-directory: ./src/ServiceBusLifeboat.Console
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/servicebus-win -r win-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true
-
-      - name: Upload artifact for deployment job (Windows Version)
-        uses: actions/upload-artifact@v2
-        with:
-          name: .servicebus-windows
-          path: ${{env.DOTNET_ROOT}}/servicebus-win
-
-      - name: dotnet publish
-        working-directory: ./src/ServiceBusLifeboat.Console
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/servicebus-lin -r linux-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true
-
-      - name: Upload artifact for deployment job (Linux Version)
-        uses: actions/upload-artifact@v2
-        with:
-          name: .servicebus-linux
-          path: ${{env.DOTNET_ROOT}}/servicebus-lin
+#name: Build Tests and Publish .NET Core
+#
+#on:
+#  push:
+#    branches: [ "main" ]
+#  pull_request:
+#    branches: [ "main" ]
+#  workflow_dispatch:
+#
+#jobs:
+#
+#  build:
+#    runs-on: ubuntu-latest
+#
+#    env:
+#      Unit_Tests_Working_Directory: ./tests/ServiceBusLifeboat.UnitTests
+#      App_Working_Directory: ./src/ServiceBusLifeboat.Cli
+#
+#    steps:
+#      - name: Checkout
+#      - uses: actions/checkout@v2
+#
+#      - name: Setup .NET Core
+#        uses: actions/setup-dotnet@v1
+#        with:
+#          dotnet-version: '6.0.x'
+#          include-prerelease: true
+#
+#      - name: Build with dotnet
+#        working-directory: ${{env.App_Working_Directory}}
+#        run: dotnet build --configuration Release
+#
+#      - name: Run cli unit tests
+#        working-directory: ${{env.Unit_Tests_Working_Directory}}
+#        run: dotnet test --configuration Release --no-restore --verbosity normal
+#
+#      - name: Dotnet publish (Windows)
+#        working-directory: ${{env.App_Working_Directory}}
+#        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/sblboat_cli_win-x64 -r win-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true
+#
+#      - name: Upload artifact for deployment job (Windows Version)
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: .sblboat_cli_windows
+#          path: ${{env.DOTNET_ROOT}}/sblboat_cli_win-x64
+#
+#      - name: Dotnet publish to linux (Linux)
+#        working-directory: ${{env.App_Working_Directory}}
+#        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/sblboat_cli_linux-x64 -r linux-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true
+#
+#      - name: Upload artifact for deployment job (Linux Version)
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: .sblboat_cli_linux
+#          path: ${{env.DOTNET_ROOT}}/sblboat_cli_linux-x64
