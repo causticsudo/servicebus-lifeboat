@@ -1,0 +1,61 @@
+name: Upload artifact and Create Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Get version from GitVersion.yml
+        id: get_version
+        run: echo "::set-output name=version::$(cat GitVersion.yml | yq -r .version)"
+
+      - name: Create Github Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          release_name: Release ${{ steps.get_version.outputs.version }}
+          draft: false
+          prerelease: false
+
+      - name: Upload linux binary artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: .sblboat_cli_linux
+          path: ${{env.DOTNET_ROOT}}/publish/linux
+
+      - name: Upload windows binary artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: .sblboat_cli_windows
+          path: ${{env.DOTNET_ROOT}}/publish/windows
+
+      - name: Attach linux binary artifacts to release
+        id: attach_artifacts
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/${{ steps.get_version.outputs.version }}/linux/.sblboat_cli_linux
+          asset_name: sblboat.sh
+
+      - name: Attach windows binary artifacts to release
+        id: attach_windows_artifacts
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/${{ steps.get_version.outputs.version }}/windows/sblboat_cli.exe
+          asset_name: sblboat_cli.exe
