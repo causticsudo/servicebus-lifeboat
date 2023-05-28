@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace ServiceBusLifeboat.Cli.Extensions;
 
 public static class StringExtensions
@@ -31,9 +33,7 @@ public static class StringExtensions
             string result = input.Substring(0, secondOccurrenceIndex + 1) + maskedPart;
 
             if (outputLimit.HasValue)
-            {
                 return TruncateString(result, outputLimit.Value);
-            }
 
             return result;
         }
@@ -44,13 +44,20 @@ public static class StringExtensions
     public static string TruncateString(string input, int maxLength)
     {
         if (input.Length > maxLength)
-        {
             return input.Substring(0, maxLength);
-        }
 
         return input;
     }
 
     public static bool IsNullOrWhiteSpace(this string input)
         => String.IsNullOrWhiteSpace(input);
+
+    public static bool IsMatchFromPattern(this string input, string pattern)
+    {
+        var regex = new Regex(pattern);
+
+        var match = regex.Match(input);
+
+        return match.Success;
+    }
 }

@@ -1,5 +1,10 @@
-﻿using System.CommandLine;
-using ServiceBusLifeboat.Cli.Commands.Namespace;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using System.CommandLine;
+using ServiceBusLifeboat.Cli.Actions.Namespace.Commands;
+using ServiceBusLifeboat.Cli.Actions.Namespace.SubCommands;
+using ServiceBusLifeboat.Cli.Extensions;
 
 namespace ServiceBusLifeboat.Cli;
 
@@ -9,10 +14,10 @@ internal class Program
 
     internal static async Task Main(String[] args)
     {
-        var rootCommand = new RootCommand(DefaultDescription);
+         var rootCommand = new ServiceCollection()
+             .ConfigureServices()
+             .GetRootCommand();
 
-        rootCommand.AddCommand(new NamespaceCommand());
-
-        await rootCommand.InvokeAsync(args);
+         await rootCommand.InvokeAsync(args);
     }
 }
