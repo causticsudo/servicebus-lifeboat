@@ -49,6 +49,10 @@ jobs:
       - name: Install coverlet.msbuild
         run: dotnet tool install --global coverlet.console
 
+      # Install reportgenerator tool
+      - name: Install reportgenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
       # Generate code coverage report
       - name: Generate code coverage report
         run: reportgenerator "-reports:**/*.lcov" "-targetdir:coverage" "-reporttypes:Html"
