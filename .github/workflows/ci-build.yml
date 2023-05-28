@@ -58,7 +58,7 @@ jobs:
 
       # Generate HTML report using ReportGenerator
       - name: Generate HTML coverage report
-        run: reportgenerator "-reports:${{env.Unit_Tests_Working_Directory}}/TestResults/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:Html"
+        run: reportgenerator "-reports:${{env.Unit_Tests_Working_Directory}}/TestResults/**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:Html"
 
       #  Publish to windows x64
       - name: Run dotnet publish for Windows
