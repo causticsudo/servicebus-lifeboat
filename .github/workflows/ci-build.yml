@@ -50,7 +50,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: coverage-reports
-          path: ${{env.Unit_Tests_Working_Directory}}/TestResults/
+          path: ${{env.Unit_Tests_Working_Directory}}
 
       # Install ReportGenerator tool
       - name: Install ReportGenerator
@@ -58,7 +58,7 @@ jobs:
 
       # Generate HTML report using ReportGenerator
       - name: Generate HTML coverage report
-        run: reportgenerator "-reports:${{env.Unit_Tests_Working_Directory}}/TestResults/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:Html"
+        run: reportgenerator "-reports:${{env.Unit_Tests_Working_Directory}}/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:Html"
 
       #  Publish to windows x64
       - name: Run dotnet publish for Windows
