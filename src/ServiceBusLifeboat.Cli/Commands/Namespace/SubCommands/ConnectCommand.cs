@@ -126,7 +126,7 @@ public class ConnectCommand : Command
         //public
     }
 
-    private static bool ValidateConnectionString(string connectionString)
+    private static bool ValidateConnectionStringPattern(string connectionString)
     {
         var pattern = @"^Endpoint=(?<Endpoint>[^;]+);SharedAccessKeyName=(?<KeyName>[^;]+);SharedAccessKey=(?<Key>[^;]+)$";
 
