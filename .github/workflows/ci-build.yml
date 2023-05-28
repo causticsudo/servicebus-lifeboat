@@ -53,8 +53,6 @@ jobs:
       - name: Run dotnet publish for Linux
         working-directory: ${{env.App_Working_Directory}}
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publish/linux -r linux-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -p:Version=${{ steps.get_version.outputs.version }}
-      - name: Zip linux-x64
-        run: (cd ${{env.DOTNET_ROOT}}/publish/linux ; zip -r ${{env.Solution_Name}}_linux-x64 *)
 
       # Upload linux artfact
       - name: Upload linux binary artifact
@@ -62,5 +60,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: ${{env.Solution_Name}}_linux-x64.zip
-          path: ${{env.DOTNET_ROOT}}/publish/linux/${{env.Solution_Name}}_linux-x64.zip
+          name: ${{env.Solution_Name}}_linux
+          path: ${{env.DOTNET_ROOT}}/publish/linux/
+
+      # Upload windows artfact
+      - name: Upload windows binary artifact
+        uses: actions/upload-artifact@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: ${{env.Solution_Name}}_windows
+          path: ${{env.DOTNET_ROOT}}/publish/windows/
