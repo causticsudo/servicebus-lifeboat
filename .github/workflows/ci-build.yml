@@ -4,10 +4,6 @@ on:
   pull_request:
     branches:
       - '*'
-  push:
-    branches-ignore:
-      - '!hotfix/*'
-      - 'main'
 
 env:
   Solution_Name: ServiceBusLifeboat
@@ -99,6 +95,11 @@ jobs:
     if: needs.build.result == 'success'
 
     steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.x'
+
     - name: Run dotnet publish for Windows
       working-directory: ${{env.App_Working_Directory}}
       run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publish/windows -r win-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -p:Version=${{ steps.get_version.outputs.version }}
