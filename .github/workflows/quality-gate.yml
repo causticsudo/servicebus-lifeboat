@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       manual_approval:
-        description: 'Approvement required'
+        description: 'Approval required'
         required: true
   push:
     branches-ignore:
@@ -18,10 +18,24 @@ jobs:
     env:
       Unit_Tests_Working_Directory: ./tests/ServiceBusLifeboat.UnitTests
 
-    ####
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      # Approval flow
+      - name: Manual Approval
+        if: github.event.inputs.manual_approval == 'true'
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: approval } = await github.actions.createOrUpdateApproval({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              event: 'APPROVE'
+            });
+            console.log('Approval created/updated:', approval);
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
