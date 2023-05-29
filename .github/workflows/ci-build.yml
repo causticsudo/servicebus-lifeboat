@@ -90,17 +90,23 @@ jobs:
 
   # Publish windows-linux binaries unstable version
   publish-unstable:
+    needs: [build, quality-gate]
+    if: needs.build.result == 'success' && needs.quality-gate.result == 'success'
     runs-on: ubuntu-latest
-    needs: build
-    if: needs.build.result == 'success'
 
     steps:
     - name: Prompt for publish confirmation
-      id: confirm_publish
-      uses: openai/action-confirm@v1
+      uses: marocchino/sticky-pull-request-comment@v2
       with:
-        question: "Do you want to proceed with the publish job?"
-        continue-on: "yes"
+        message: "Do you want to proceed with the publish job? Reply 'yes' to confirm."
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Wait for user confirmation
+      uses: marocchino/wait-action@v2
+      with:
+        comment-token: ${{ secrets.GITHUB_TOKEN }}
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-text: "yes"
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
