@@ -1,0 +1,45 @@
+name: Sonarcloud Quality gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      manual_approval:
+        description: 'Approvement required'
+        required: true
+  push:
+    branches-ignore:
+      - '!hotfix/*'
+      - 'main'
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Install dotnet-sonarscanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build and Test
+        run: |
+          dotnet build
+          dotnet test --collect:"XPlat Code Coverage" --settings ./coverlet.runsettings
+
+      - name: SonarCloud Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner begin /k:"causticsudo_servicebus-lifeboat" /d:sonar.login="${{ env.SONAR_TOKEN }}"
+
+      - name: SonarCloud End
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner end /d:sonar.login="${{ env.SONAR_TOKEN }}"
