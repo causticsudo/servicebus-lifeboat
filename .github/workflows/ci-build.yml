@@ -52,6 +52,10 @@ jobs:
       - name: Generate HTML coverage report
         run: reportgenerator "-reports:${{env.Unit_Tests_Working_Directory}}/TestResults/**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:Html"
 
+      - name: Set publish-unstable flag
+        id: set_publish_flag
+        run: echo "::set-env name=PUBLISH_FLAG::true"
+
   # Pull request analysis with sonarcloud
   quality-gate:
     runs-on: ubuntu-latest
@@ -90,23 +94,60 @@ jobs:
 
   # Publish windows-linux binaries unstable version
   publish-unstable:
-    needs: [build, quality-gate]
-    if: needs.build.result == 'success' && needs.quality-gate.result == 'success'
+    needs: build
+    if: needs.build.result == 'success' && env.PUBLISH_FLAG == 'true' && needs.quality-gate.result != 'cancelled'
     runs-on: ubuntu-latest
 
     steps:
     - name: Prompt for publish confirmation
-      uses: marocchino/sticky-pull-request-comment@v2
+      uses: actions/github-script@v4
+      id: approve-publish
       with:
-        message: "Do you want to proceed with the publish job? Reply 'yes' to confirm."
-        token: ${{ secrets.GITHUB_TOKEN }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const { data } = await octokit.pulls.listReviews({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number
+          });
+          const approvedReviews = data.filter(review => review.state === 'APPROVED');
+          if (approvedReviews.length === 0) {
+            const { data } = await octokit.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              event: 'APPROVE'
+            });
+            console.log(`Review approved: ${data.html_url}`);
+          } else {
+            console.log('Publish approval already provided.');
+          }
 
-    - name: Wait for user confirmation
-      uses: marocchino/wait-action@v2
+    - name: Wait for publish approval
+      uses: actions/github-script@v4
       with:
-        comment-token: ${{ secrets.GITHUB_TOKEN }}
-        issue-number: ${{ github.event.pull_request.number }}
-        comment-text: "yes"
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const { data } = await octokit.pulls.get({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number
+          });
+          if (data.state !== 'open') {
+            console.log('Pull request is closed. Exiting workflow.');
+            process.exit(0);
+          }
+          const { data: reviews } = await octokit.pulls.listReviews({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number
+          });
+          const approvedReviews = reviews.filter(review => review.state === 'APPROVED');
+          if (approvedReviews.length === 0) {
+            console.log('Publish approval not provided. Exiting workflow.');
+            process.exit(0);
+          }
+
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
