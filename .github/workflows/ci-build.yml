@@ -16,61 +16,49 @@ jobs:
       App_Working_Directory: ./src/ServiceBusLifeboat.Cli
 
     steps:
-      # Make code checkout
       - name: Checkout
         uses: actions/checkout@v2
 
-      # Create version from .git/GitVersion.yml
       - name: Get version from GitVersion.yml 
         id: get_version
         run: echo "::set-output name=version::$(cat .github/GitVersion.yml | yq -r .version)"
 
-      # Setup an especific dotnet version
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '6.0.x'
           include-prerelease: true
 
-      # Restore all dependencies from solution
       - name: Restore dependencies
         run: dotnet restore
 
-      # Compile all projects from solution
       - name: Run dotnet build
         run: dotnet build
 
-      # Run unit tests from unit tests csproj and generate coverage reports
       - name: Run dotnet tests and generate coverage reports
         working-directory: ${{env.Unit_Tests_Working_Directory}}
         run: dotnet test --collect:"XPlat Code Coverage" --settings coverlet.runsettings
 
-      # Publish coverage reports as artifacts
       - name: Publish coverage reports
         uses: actions/upload-artifact@v2
         with:
           name: coverage-reports
           path: ${{env.Unit_Tests_Working_Directory}}/TestResults/
 
-      # Install ReportGenerator tool
       - name: Install ReportGenerator
         run: dotnet tool install -g dotnet-reportgenerator-globaltool
 
-      # Generate HTML report using ReportGenerator
       - name: Generate HTML coverage report
         run: reportgenerator "-reports:${{env.Unit_Tests_Working_Directory}}/TestResults/**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:Html"
 
-      #  Publish to windows x64
       - name: Run dotnet publish for Windows
         working-directory: ${{env.App_Working_Directory}}
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publish/windows -r win-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -p:Version=${{ steps.get_version.outputs.version }}
 
-      #  Publish to linux x64
       - name: Run dotnet publish for Linux
         working-directory: ${{env.App_Working_Directory}}
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publish/linux -r linux-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -p:Version=${{ steps.get_version.outputs.version }}
 
-      # Upload linux artfact
       - name: Upload linux binary artifact
         uses: actions/upload-artifact@v2
         env:
@@ -79,7 +67,6 @@ jobs:
           name: ${{env.Solution_Name}}_linux
           path: ${{env.DOTNET_ROOT}}/publish/linux/
 
-      # Upload windows artfact
       - name: Upload windows binary artifact
         uses: actions/upload-artifact@v2
         env:
@@ -87,3 +74,39 @@ jobs:
         with:
           name: ${{env.Solution_Name}}_windows
           path: ${{env.DOTNET_ROOT}}/publish/windows/
+
+  quality-gate:
+    runs-on: ubuntu-latest
+
+    env:
+      Unit_Tests_Working_Directory: ./tests/ServiceBusLifeboat.UnitTests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Install dotnet-sonarscanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: SonarCloud PR Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner begin /k:"causticsudo_servicebus-lifeboat" /d:sonar.login="${{ env.SONAR_TOKEN }}" /o:"servicebus-lifeboat" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.pullrequest.branch="${{ github.head_ref }}" /d:sonar.pullrequest.base="${{ github.base_ref }}" /d:sonar.pullrequest.key="${{ github.event.pull_request.number }}"
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build and Test
+        run: |
+          dotnet build
+          dotnet test --collect:"XPlat Code Coverage" --settings ${{env.Unit_Tests_Working_Directory}}/coverlet.runsettings
+
+      - name: SonarCloud PR End
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner end /d:sonar.login="${{ env.SONAR_TOKEN }}"

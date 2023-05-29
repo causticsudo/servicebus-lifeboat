@@ -7,8 +7,7 @@ on:
         description: 'Approval required'
         required: true
   push:
-    branches-ignore:
-      - '!hotfix/*'
+    branches:
       - 'main'
 
 jobs:
@@ -22,7 +21,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # Approval flow
+      # - Approval flow --
       - name: Manual Approval
         if: github.event.inputs.manual_approval == 'true'
         uses: actions/github-script@v4

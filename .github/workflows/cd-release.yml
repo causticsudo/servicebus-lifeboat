@@ -14,23 +14,19 @@ jobs:
       App_Working_Directory: ./src/ServiceBusLifeboat.Cli
 
     steps:
-      # Make code checkout
       - name: Checkout
         uses: actions/checkout@v2
 
-      # Create version from .git/GitVersion.yml
       - name: Get version from GitVersion.yml
         id: get_version
         run: echo "::set-output name=version::$(cat .github/GitVersion.yml | yq -r .version)"
 
-      # Setup an especific dotnet version
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '6.0.x'
           include-prerelease: true
 
-      # Create github release
       - name: Create Github Release
         id: create_release
         uses: actions/create-release@v1
@@ -42,21 +38,18 @@ jobs:
           draft: false
           prerelease: false
 
-      #  Publish to windows x64 and make .zip folder
       - name: Run dotnet publish for Windows
         working-directory: ${{env.App_Working_Directory}}
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publish/windows -r win-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -p:Version=${{ steps.get_version.outputs.version }}
       - name: Zip win-x64
         run: (cd ${{env.DOTNET_ROOT}}/publish/windows ; zip -r ${{env.Solution_Name}}_win-x64 *)
 
-      #  Publish to linux x64 and make .zip folder
       - name: Run dotnet publish for Linux
         working-directory: ${{env.App_Working_Directory}}
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publish/linux -r linux-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -p:Version=${{ steps.get_version.outputs.version }}
       - name: Zip linux-x64
         run: (cd ${{env.DOTNET_ROOT}}/publish/linux ; zip -r ${{env.Solution_Name}}_linux-x64 *)
 
-      # Upload linux artifact
       - name: Upload linux binary artifact
         uses: actions/upload-release-asset@v1
         env:
@@ -67,7 +60,6 @@ jobs:
           asset_name: ${{env.Solution_Name}}_linux-x64.zip
           asset_content_type: application/zip
 
-      # Upload windows artifact
       - name: Upload windows binary artifact
         uses: actions/upload-release-asset@v1
         env:
