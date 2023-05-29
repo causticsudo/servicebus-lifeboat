@@ -95,10 +95,10 @@ jobs:
       - name: Install dotnet-sonarscanner
         run: dotnet tool install --global dotnet-sonarscanner
 
-      - name: SonarCloud PR Scan
+      - name: SonarCloud pull request begin scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: dotnet sonarscanner begin /k:"causticsudo_servicebus-lifeboat" /d:sonar.login="${{ env.SONAR_TOKEN }}" /o:"servicebus-lifeboat" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.pullrequest.branch="${{ github.head_ref }}" /d:sonar.pullrequest.base="${{ github.base_ref }}" /d:sonar.pullrequest.key="${{ github.event.pull_request.number }}"
+        run: dotnet sonarscanner begin /k:"causticsudo_servicebus-lifeboat" /d:sonar.login="${{ env.SONAR_TOKEN }}" /o:"servicebus-lifeboat" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.pullrequest.branch="${{ github.event.pull_request.head.ref }}" /d:sonar.pullrequest.base="${{ github.event.pull_request.base.ref }}" /d:sonar.pullrequest.key="${{ github.event.pull_request.number }}"
 
       - name: Restore dependencies
         run: dotnet restore
@@ -108,7 +108,7 @@ jobs:
           dotnet build
           dotnet test --collect:"XPlat Code Coverage" --settings ${{env.Unit_Tests_Working_Directory}}/coverlet.runsettings
 
-      - name: SonarCloud PR End
+      - name: SonarCloud pull request end scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: dotnet sonarscanner end /d:sonar.login="${{ env.SONAR_TOKEN }}"
