@@ -31,6 +31,11 @@ jobs:
       - name: Install dotnet-sonarscanner
         run: dotnet tool install --global dotnet-sonarscanner
 
+      - name: SonarCloud Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner begin /k:"causticsudo_servicebus-lifeboat" /d:sonar.login="${{ env.SONAR_TOKEN }}" /o:"servicebus-lifeboat" /d:sonar.host.url="https://sonarcloud.io"
+
       - name: Restore dependencies
         run: dotnet restore
 
@@ -38,11 +43,6 @@ jobs:
         run: |
           dotnet build
           dotnet test --collect:"XPlat Code Coverage" --settings ${{env.Unit_Tests_Working_Directory}}/coverlet.runsettings
-
-      - name: SonarCloud Scan
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: dotnet sonarscanner begin /k:"causticsudo_servicebus-lifeboat" /d:sonar.login="${{ env.SONAR_TOKEN }}" /o:"servicebus-lifeboat" /d:sonar.host.url="https://sonarcloud.io"
 
       - name: SonarCloud End
         env:
