@@ -1,4 +1,4 @@
-name: Sonarcloud Quality gate
+name: Sonarcloud Analysis
 
 on:
   workflow_dispatch:

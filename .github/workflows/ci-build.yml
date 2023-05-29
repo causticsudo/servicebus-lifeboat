@@ -77,6 +77,8 @@ jobs:
 
   quality-gate:
     runs-on: ubuntu-latest
+    needs: build
+    if: needs.build.result == 'success'
 
     env:
       Unit_Tests_Working_Directory: ./tests/ServiceBusLifeboat.UnitTests
