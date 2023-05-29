@@ -95,6 +95,13 @@ jobs:
     if: needs.build.result == 'success'
 
     steps:
+    - name: Prompt for publish confirmation
+      id: confirm_publish
+      uses: openai/action-confirm@v1
+      with:
+        question: "Do you want to proceed with the publish job?"
+        continue-on: "yes"
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
