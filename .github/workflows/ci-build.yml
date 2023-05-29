@@ -95,7 +95,7 @@ jobs:
   # Publish windows-linux binaries unstable version
   publish-unstable:
     needs: build
-    if: needs.build.result == 'success' && env.PUBLISH_FLAG == 'true' && needs.quality-gate.result != 'cancelled'
+    if: needs.build.result == 'success' && ${{ env.SONAR_TOKEN }} == 'true' && needs.quality-gate.result != 'cancelled'
     runs-on: ubuntu-latest
 
     steps:
