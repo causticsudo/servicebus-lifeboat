@@ -52,9 +52,6 @@ jobs:
       - name: Generate HTML coverage report
         run: reportgenerator "-reports:${{env.Unit_Tests_Working_Directory}}/TestResults/**/coverage.cobertura.xml" "-targetdir:coverage" "-reporttypes:Html"
 
-      - name: Set publish-unstable flag
-        id: set_publish_flag
-        run: echo "::set-env name=PUBLISH_FLAG::true"
 
   # Pull request analysis with sonarcloud
   quality-gate:
@@ -95,7 +92,7 @@ jobs:
   # Publish windows-linux binaries unstable version
   publish-unstable:
     needs: build
-    if: needs.build.result == 'success' && ${{ env.SONAR_TOKEN }} == 'true' && needs.quality-gate.result != 'cancelled'
+    if: needs.build.result == 'success' && needs.quality-gate.result != 'cancelled'
     runs-on: ubuntu-latest
 
     steps:
