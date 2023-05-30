@@ -8,8 +8,8 @@ on:
 env:
   Solution_Name: ServiceBusLifeboat
   Unit_Tests_Working_Directory: ./tests/ServiceBusLifeboat.UnitTests
-
   App_Working_Directory: ./src/ServiceBusLifeboat.Cli
+
 jobs:
 
   # Build, Unit Tests, Coverage Report
