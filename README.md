@@ -3,7 +3,7 @@
 </p>
 
 <h4  align="center">
-	🔍 Service Bus Lifeboat
+	🔍 Servicebus Lifeboat
 </h4>
 <p  align="center">
 <a  href="#telescope-projeto">🔭 Projeto</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp
@@ -16,8 +16,6 @@
 ## :telescope: Projeto
 
 
-
-
 ## 💜 Preview
 
 
@@ -27,6 +25,6 @@
 
 --- 
 
-<h5 align="center"> 🔍 Service Bus CLI </h5>
+<h5 align="center"> 🔍 servicebus lifeboat cli </h5>
 
 ---
