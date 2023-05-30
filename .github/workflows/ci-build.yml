@@ -103,9 +103,11 @@ jobs:
         dotnet-version: '6.0.x'
 
     - name: Run dotnet publish for Windows
+      working-directory: /src/ServiceBusLifeboat.Cli
       run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publish/windows -r win-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -p:Version=${{ steps.get_version.outputs.version }}
 
     - name: Run dotnet publish for Linux
+      working-directory: /src/ServiceBusLifeboat.Cli
       run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publish/linux -r linux-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -p:Version=${{ steps.get_version.outputs.version }}
 
     - name: Upload linux binary artifact
