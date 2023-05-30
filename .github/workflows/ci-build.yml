@@ -8,8 +8,8 @@ on:
 env:
   Solution_Name: ServiceBusLifeboat
   Unit_Tests_Working_Directory: ./tests/ServiceBusLifeboat.UnitTests
-  App_Working_Directory: '/home/runner/work/servicebus-lifeboat/src/ServiceBusLifeboat.Cli'
 
+  App_Working_Directory: ./src/ServiceBusLifeboat.Cli
 jobs:
 
   # Build, Unit Tests, Coverage Report
@@ -60,9 +60,6 @@ jobs:
     if: needs.build.result == 'success'
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
