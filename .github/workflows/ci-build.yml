@@ -60,6 +60,9 @@ jobs:
     if: needs.build.result == 'success'
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
@@ -100,7 +103,7 @@ jobs:
         dotnet-version: '6.0.x'
 
     - name: Run dotnet publish for Windows
-      working-directory: /home/runner/work/servicebus-lifeboat/src/ServiceBusLifeboat.Cli
+      working-directory: ${{ env.App_Working_Directory }}
       run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/publish/windows -r win-x64 -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -p:Version=${{ steps.get_version.outputs.version }}
 
     - name: Run dotnet publish for Linux
