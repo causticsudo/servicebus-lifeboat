@@ -1,4 +1,6 @@
-![Header](./assets/logo.gif)
+<p align="center">
+    <img src="./assets/logo.gif" alt="logo">
+</p>
 
 <h4  align="center">
 	🔍 Service Bus Lifeboat
