@@ -94,58 +94,9 @@ jobs:
     needs: build
     if: needs.build.result == 'success' && needs.quality-gate.result != 'cancelled'
     runs-on: ubuntu-latest
+    environment: unstable
 
     steps:
-    - name: Prompt for publish confirmation
-      uses: actions/github-script@v4
-      id: approve-publish
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const { data } = await octokit.pulls.listReviews({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.issue.number
-          });
-          const approvedReviews = data.filter(review => review.state === 'APPROVED');
-          if (approvedReviews.length === 0) {
-            const { data } = await octokit.pulls.createReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
-              event: 'APPROVE'
-            });
-            console.log(`Review approved: ${data.html_url}`);
-          } else {
-            console.log('Publish approval already provided.');
-          }
-
-    - name: Wait for publish approval
-      uses: actions/github-script@v4
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const { data } = await octokit.pulls.get({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.issue.number
-          });
-          if (data.state !== 'open') {
-            console.log('Pull request is closed. Exiting workflow.');
-            process.exit(0);
-          }
-          const { data: reviews } = await octokit.pulls.listReviews({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.issue.number
-          });
-          const approvedReviews = reviews.filter(review => review.state === 'APPROVED');
-          if (approvedReviews.length === 0) {
-            console.log('Publish approval not provided. Exiting workflow.');
-            process.exit(0);
-          }
-
-
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:

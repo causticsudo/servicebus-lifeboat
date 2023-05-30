@@ -11,7 +11,7 @@ on:
       - 'main'
 
 jobs:
-  quality-gate:
+  scan:
     runs-on: ubuntu-latest
 
     env:
