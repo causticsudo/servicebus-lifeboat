@@ -1,63 +1,35 @@
-using System.Text.RegularExpressions;
+using System.Security;
+using System.Text;
 
 namespace ServiceBusLifeboat.Cli.Extensions;
 
 public static class StringExtensions
 {
-    public static string MaskAfterCharCount(
-        this string input,
-        char charToMask,
-        int charCount,
-        int? outputLimit = null,
-        char maskChar = '*')
+
+    public static bool IsNullOrWhiteSpace(this string input) =>
+        String.IsNullOrWhiteSpace(input);
+
+    public static string FormatMacAddress(this string input) =>
+        input.Replace(":", "").Replace("-", "");
+
+    public static string ToBase64String(this string input)
     {
-        int occurrenceCount = 0;
-        int secondOccurrenceIndex = -1;
+        var inputInBytes = Encoding.UTF8.GetBytes(input);
 
-        for (int i = 0; i < input.Length; i++)
-        {
-            if (input[i] == charToMask)
-            {
-                occurrenceCount++;
-                if (occurrenceCount == charCount)
-                {
-                    secondOccurrenceIndex = i;
-                    break;
-                }
-            }
-        }
-
-        if (secondOccurrenceIndex >= 0 && secondOccurrenceIndex < input.Length - charCount)
-        {
-            string maskedPart = new string(maskChar, input.Length - secondOccurrenceIndex - charCount);
-            string result = input.Substring(0, secondOccurrenceIndex + 1) + maskedPart;
-
-            if (outputLimit.HasValue)
-                return TruncateString(result, outputLimit.Value);
-
-            return result;
-        }
-
-        return input;
+        return Convert.ToBase64String(inputInBytes);
     }
 
-    public static string TruncateString(string input, int maxLength)
+    public static SecureString ConvertToSecureString(this string input)
     {
-        if (input.Length > maxLength)
-            return input.Substring(0, maxLength);
+        var secureString = new SecureString();
 
-        return input;
-    }
+        foreach (char c in input)
+        {
+            secureString.AppendChar(c);
+        }
 
-    public static bool IsNullOrWhiteSpace(this string input)
-        => String.IsNullOrWhiteSpace(input);
+        secureString.MakeReadOnly();
 
-    public static bool IsMatchFromPattern(this string input, string pattern)
-    {
-        var regex = new Regex(pattern);
-
-        var match = regex.Match(input);
-
-        return match.Success;
+        return secureString;
     }
 }

@@ -24,16 +24,18 @@ public static class ServiceCollectionExtensions
             .WriteTo.Console()
             .CreateLogger();
 
-        services
-            .AddSingleton<Serilog.ILogger>(_ => Log.Logger)
-            .AddLogging(builder => builder.SetMinimumLevel(LogLevel.Debug).AddSerilog());
+        services.AddSingleton<Serilog.ILogger>(_ => Log.Logger);
+        services.AddLogging(builder => builder.SetMinimumLevel(LogLevel.Debug).AddSerilog());
     }
 
-    private static void AddCommands(IServiceCollection services) =>
-        services
-            .AddSingleton<NamespaceCommand>()
-            .AddSingleton<ConnectCommand>();
+    private static void AddCommands(IServiceCollection services)
+    {
+        services.AddSingleton<NamespaceCommand>();
+        services.AddSingleton<CreateConnectionCommand>();
+    }
 
-    private static void AddCommandHandlers(IServiceCollection services) =>
-        services.AddTransient<ConnectCommandHandler>();
+    private static void AddCommandHandlers(IServiceCollection services)
+    {
+        services.AddTransient<CreateConnectionCommandHandler>();
+    }
 }

@@ -8,8 +8,8 @@ public class NamespaceCommand : Command
     private const string CommandName = "namespace";
     private const string CommandDescription = "Connect, Add or Remove an Namespace";
 
-    public NamespaceCommand(ConnectCommand connectCommand) : base(CommandName, CommandDescription)
+    public NamespaceCommand(CreateConnectionCommand createConnectionCommand) : base(CommandName, CommandDescription)
     {
-        AddCommand(connectCommand);
+        AddCommand(createConnectionCommand);
     }
 }
