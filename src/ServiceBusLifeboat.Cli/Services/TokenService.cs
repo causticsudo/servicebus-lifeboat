@@ -13,7 +13,7 @@ public static class TokenService
     public static string GenerateToken(int expirationInMinutes = DefaultExpirationInMinutes)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var userInfo = EnvironmentExtensions.GetSystemUserInfo();
+        var userInfo = EnvironmentService.GetSystemUserInfo();
         var physicalAddressInfo = NetworkInterfaceService.GetMacAddress();
         var combinedInfo = userInfo + physicalAddressInfo;
         using var sha256 = SHA256.Create();

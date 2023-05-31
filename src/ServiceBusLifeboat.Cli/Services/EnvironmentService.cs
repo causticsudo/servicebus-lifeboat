@@ -1,6 +1,6 @@
 namespace ServiceBusLifeboat.Cli.Services;
 
-public static class EnvironmentExtensions
+public static class EnvironmentService
 {
     public static string GetSystemUserInfo()
     {
