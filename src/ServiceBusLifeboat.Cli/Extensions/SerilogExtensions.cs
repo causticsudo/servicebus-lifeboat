@@ -9,6 +9,8 @@ namespace ServiceBusLifeboat.Cli.Extensions;
 
 internal static class SerilogExtensions
 {
+    private static readonly LoggerConfiguration _loggerConfiguration = new LoggerConfiguration();
+
     public static void LogSuccessInformation(this ILogger logger, string message)
     {
         var customTheme = SystemConsoleThemeTemplates.Success;
@@ -38,7 +40,7 @@ internal static class SerilogExtensions
 
     private static void WriteCustomMessage(CustomLogLevel level, string template, string message, SystemConsoleTheme theme)
     {
-        using (var log = new LoggerConfiguration().WriteTo.Console(theme: theme).CreateLogger())
+        using (var log = _loggerConfiguration.WriteTo.Console(theme: theme).CreateLogger())
         {
             switch (level)
             {

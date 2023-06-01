@@ -1,4 +1,4 @@
-namespace ServiceBusLifeboat.Cli.Application;
+    namespace ServiceBusLifeboat.Cli.Application;
 
 public class ConfigurationManager
 {

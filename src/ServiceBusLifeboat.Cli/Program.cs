@@ -25,13 +25,14 @@ internal class Program
                 services.AddCommands();
                 services.AddCommandHandlers();
 
-                var logger = new LoggerConfiguration()
+                var loggerConfiguration = new LoggerConfiguration()
                     .MinimumLevel.Debug()
-                    .WriteTo.Console()
-                    .CreateLogger();
+                    .WriteTo.Console();
+
+                var logger = loggerConfiguration.CreateLogger();
 
                 services.AddSingleton<Serilog.ILogger>(logger);
-                services.AddLogging(builder => builder.SetMinimumLevel(LogLevel.Debug).AddSerilog());
+                services.AddLogging(builder => builder.SetMinimumLevel(LogLevel.Debug).AddSerilog(logger));
             })
             .UseConsoleLifetime();
 }
