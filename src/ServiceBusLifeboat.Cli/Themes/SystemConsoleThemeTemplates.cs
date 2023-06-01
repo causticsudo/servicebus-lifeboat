@@ -21,7 +21,7 @@ public static class SystemConsoleThemeTemplates
         }
     });
 
-    public static SystemConsoleTheme Stored { get; } = new(new Dictionary<ConsoleThemeStyle, SystemConsoleThemeStyle>
+    public static SystemConsoleTheme Saved { get; } = new(new Dictionary<ConsoleThemeStyle, SystemConsoleThemeStyle>
     {
         {
             ConsoleThemeStyle.LevelInformation,
@@ -37,7 +37,7 @@ public static class SystemConsoleThemeTemplates
         }
     });
 
-    public static SystemConsoleTheme NotStored { get; } = new(new Dictionary<ConsoleThemeStyle, SystemConsoleThemeStyle>
+    public static SystemConsoleTheme NotSaved { get; } = new(new Dictionary<ConsoleThemeStyle, SystemConsoleThemeStyle>
     {
         {
             ConsoleThemeStyle.LevelWarning,

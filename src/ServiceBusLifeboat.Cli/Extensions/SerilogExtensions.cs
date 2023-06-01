@@ -1,43 +1,58 @@
 using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
+using ServiceBusLifeboat.Cli.Enums;
+using static ServiceBusLifeboat.Cli.Enums.CustomLogLevel;
 using ServiceBusLifeboat.Cli.Themes;
 using ILogger = Serilog.ILogger;
 
 namespace ServiceBusLifeboat.Cli.Extensions;
 
-public static class SerilogExtensions
+internal static class SerilogExtensions
 {
-    public static void Success(this ILogger logger, string message)
+    private static readonly LoggerConfiguration _logger = new LoggerConfiguration();
+
+    public static void LogSuccessInformation(this ILogger logger, string message)
     {
         var customTheme = SystemConsoleThemeTemplates.Success;
+        var level = Success;
+        var template = "[SUCCESS] {Message}";
 
-        new LoggerConfiguration()
-            .WriteTo.Console(theme: customTheme)
-            .CreateLogger()
-            .Information("[SUCCESS] {Message}", message);
-
-        Log.CloseAndFlush();
+        WriteCustomMessage(level, template, message, customTheme);
     }
 
-    public static void Stored(this ILogger logger, string message)
+    public static void LogSavedInformation(this ILogger logger, string message)
     {
-        var customTheme = SystemConsoleThemeTemplates.Stored;
+        var customTheme = SystemConsoleThemeTemplates.NotSaved;
+        var level = Saved;
+        var template = "[RESOURCE SAVED] {Message}";
 
-        new LoggerConfiguration()
-            .WriteTo.Console(theme: customTheme)
-            .CreateLogger()
-            .Information("[RESOURCE STORED] {Message}", message);
-
-        Log.CloseAndFlush();
+        WriteCustomMessage(level, template, message, customTheme);
     }
 
-    public static void NotStored(this ILogger logger, string message)
+    public static void LogNotSavedWarning(this ILogger logger, string message)
     {
-        var customTheme = SystemConsoleThemeTemplates.NotStored;
+        var level = NotSaved;
+        var customTheme = SystemConsoleThemeTemplates.NotSaved;
+        var template = "[RESOURCE NOT SAVED] {Message}";
 
-        new LoggerConfiguration()
-            .WriteTo.Console(theme: customTheme)
-            .CreateLogger()
-            .Warning("[RESOURCE NOT STORED] {Message}", message);
+        WriteCustomMessage(level, template, message, customTheme);
+    }
+
+    private static void WriteCustomMessage(CustomLogLevel level, string template, string message, SystemConsoleTheme theme)
+    {
+        using (var logger =_logger.WriteTo.Console(theme: theme).CreateLogger())
+        {
+            switch (level)
+            {
+                case Success or Saved:
+                    logger.Information(template, message);
+                    break;
+
+                case NotSaved:
+                    logger.Warning(template, message);
+                    break;
+            }
+        }
 
         Log.CloseAndFlush();
     }

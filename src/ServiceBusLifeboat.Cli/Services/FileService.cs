@@ -43,7 +43,7 @@ public class FileService
                     writer.Write(configContent);
                 }
 
-                _logger.Success("Configuration file created with success");
+                _logger.LogSuccessInformation("Configuration file created with success");
 
                 return configFile;
             }

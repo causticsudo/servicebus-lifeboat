@@ -68,7 +68,7 @@ public class CreateConnectionCommandHandler
             _adminClient = new ServiceBusAdministrationClient(connectionString.ToSafeString());
             _client = new ServiceBusClient(connectionString.ToSafeString());
 
-            _logger.Success($"Successful connection validation");
+            _logger.LogSuccessInformation($"Successful connection validation");
         }
         catch (Exception ex) when(ex is FormatException)
         {
