@@ -38,21 +38,18 @@ internal static class SerilogExtensions
 
     private static void WriteCustomMessage(CustomLogLevel level, string template, string message, SystemConsoleTheme theme)
     {
-        var loggerConfig = new LoggerConfiguration();
-        using (var logger = loggerConfig.WriteTo.Console(theme: theme).CreateLogger())
+        using (var log = new LoggerConfiguration().WriteTo.Console(theme: theme).CreateLogger())
         {
             switch (level)
             {
                 case Success or Saved:
-                    logger.Information(template, message);
+                    log.Information(template, message);
                     break;
 
                 case NotSaved:
-                    logger.Warning(template, message);
+                    log.Warning(template, message);
                     break;
             }
         }
-
-        Log.CloseAndFlush();
     }
 }
