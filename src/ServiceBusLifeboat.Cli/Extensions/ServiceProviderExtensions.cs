@@ -7,7 +7,7 @@ namespace ServiceBusLifeboat.Cli.Extensions;
 
 public static class ServiceProviderExtensions
 {
-    public static RootCommand GetRootCommand(this IServiceProvider? serviceProvider)
+    public static RootCommand BuildRootCommand(this IServiceProvider? serviceProvider)
     {
         var rootCommand = new RootCommand(DefaultApplicationDescription);
 
