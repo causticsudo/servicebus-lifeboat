@@ -55,7 +55,7 @@ jobs:
     needs: build
     if: |
       needs.build.result == 'success' &&
-      ${{ github.event.pull_request_target.state }} == 'open'
+      github.event.pull_request_target.state == 'open'
 
     steps:
       - name: Checkout repository
