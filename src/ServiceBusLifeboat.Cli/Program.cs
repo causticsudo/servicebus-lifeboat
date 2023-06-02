@@ -24,6 +24,7 @@ internal class Program
             {
                 services.AddCommands();
                 services.AddCommandHandlers();
+                services.AddServices();
 
                 var loggerConfiguration = new LoggerConfiguration()
                     .MinimumLevel.Debug()

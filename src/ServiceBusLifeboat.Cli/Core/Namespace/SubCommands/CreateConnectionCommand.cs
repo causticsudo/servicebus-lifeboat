@@ -1,7 +1,7 @@
 using System.CommandLine;
 using ServiceBusLifeboat.Cli.Extensions;
 
-namespace ServiceBusLifeboat.Cli.Actions.Namespace.SubCommands;
+namespace ServiceBusLifeboat.Cli.Core.Namespace.SubCommands;
 
 public class CreateConnectionCommand : Command
 {

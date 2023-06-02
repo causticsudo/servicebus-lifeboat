@@ -5,7 +5,6 @@ namespace ServiceBusLifeboat.Cli.Extensions;
 
 public static class StringExtensions
 {
-
     public static bool IsNullOrWhiteSpace(this string input) =>
         String.IsNullOrWhiteSpace(input);
 

@@ -1,17 +1,15 @@
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
-using ServiceBusLifeboat.Cli.Enums;
-using static ServiceBusLifeboat.Cli.Enums.CustomLogLevel;
+using ServiceBusLifeboat.Cli.Extensions.Serilog.Enums;
 using ServiceBusLifeboat.Cli.Themes;
+using static ServiceBusLifeboat.Cli.Extensions.Serilog.Enums.CustomLogLevel;
 using ILogger = Serilog.ILogger;
 
-namespace ServiceBusLifeboat.Cli.Extensions;
+namespace ServiceBusLifeboat.Cli.Extensions.Serilog;
 
 internal static class SerilogExtensions
 {
-    private static readonly LoggerConfiguration _loggerConfiguration = new LoggerConfiguration();
-
-    public static void LogSuccessInformation(this ILogger logger, string message)
+    public static void SuccessInformation(this ILogger logger, string message)
     {
         var customTheme = SystemConsoleThemeTemplates.Success;
         var level = Success;
@@ -20,7 +18,7 @@ internal static class SerilogExtensions
         WriteCustomMessage(level, template, message, customTheme);
     }
 
-    public static void LogSavedInformation(this ILogger logger, string message)
+    public static void SavedInformation(this ILogger logger, string message)
     {
         var customTheme = SystemConsoleThemeTemplates.NotSaved;
         var level = Saved;
@@ -29,7 +27,7 @@ internal static class SerilogExtensions
         WriteCustomMessage(level, template, message, customTheme);
     }
 
-    public static void LogNotSavedWarning(this ILogger logger, string message)
+    public static void NotSavedWarning(this ILogger logger, string message)
     {
         var level = NotSaved;
         var customTheme = SystemConsoleThemeTemplates.NotSaved;
@@ -40,7 +38,7 @@ internal static class SerilogExtensions
 
     private static void WriteCustomMessage(CustomLogLevel level, string template, string message, SystemConsoleTheme theme)
     {
-        using (var log = _loggerConfiguration.WriteTo.Console(theme: theme).CreateLogger())
+        using (var log = new LoggerConfiguration().WriteTo.Console(theme: theme).CreateLogger())
         {
             switch (level)
             {
@@ -53,5 +51,7 @@ internal static class SerilogExtensions
                     break;
             }
         }
+
+        Log.CloseAndFlush();
     }
 }

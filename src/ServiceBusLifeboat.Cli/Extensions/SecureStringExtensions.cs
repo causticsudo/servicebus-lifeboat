@@ -5,7 +5,7 @@ namespace ServiceBusLifeboat.Cli.Extensions;
 
 public static class SecureStringExtensions
 {
-    public static string ToSafeString(this SecureString secureString)
+    public static string ToStringSafely(this SecureString secureString)
     {
         var insecureStringPtr = IntPtr.Zero;
 

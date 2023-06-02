@@ -3,18 +3,25 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using ServiceBusLifeboat.Cli.Extensions;
+using ServiceBusLifeboat.Cli.Services.NetworkInterface;
 
-namespace ServiceBusLifeboat.Cli.Services;
+namespace ServiceBusLifeboat.Cli.Services.Token;
 
-public static class TokenService
+public class TokenService : ITokenService
 {
-    private const int DefaultExpirationInMinutes = 1440;
+    private readonly INetworkInterfaceService _networkInterfaceService;
 
-    public static string GenerateToken(int expirationInMinutes = DefaultExpirationInMinutes)
+    public TokenService()
+    {
+        _networkInterfaceService = new NetworkInterfaceService();
+    }
+
+    public string GenerateToken(int expirationInMinutes)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var userInfo = EnvironmentService.GetSystemUserInfo();
-        var physicalAddressInfo = NetworkInterfaceService.GetMacAddress();
+        var userInfo = EnvironmentExtensions.GetSystemUserInfo();
+        var physicalAddressInfo = _networkInterfaceService.GetMacAddress();
         var combinedInfo = userInfo + physicalAddressInfo;
         using var sha256 = SHA256.Create();
         var secretKey = sha256.ComputeHash(Encoding.UTF8.GetBytes(combinedInfo));

@@ -1,13 +1,13 @@
 using System.Net.NetworkInformation;
 using ServiceBusLifeboat.Cli.Extensions;
 
-namespace ServiceBusLifeboat.Cli.Services;
+namespace ServiceBusLifeboat.Cli.Services.NetworkInterface;
 
-public class NetworkInterfaceService
+public class NetworkInterfaceService : INetworkInterfaceService
 {
-    public static string GetMacAddress()
+    public string GetMacAddress()
     {
-        var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
+        var networkInterfaces = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
 
         foreach (var @interface in networkInterfaces)
         {

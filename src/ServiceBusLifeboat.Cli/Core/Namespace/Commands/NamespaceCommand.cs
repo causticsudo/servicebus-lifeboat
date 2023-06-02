@@ -1,7 +1,7 @@
 using System.CommandLine;
-using ServiceBusLifeboat.Cli.Actions.Namespace.SubCommands;
+using ServiceBusLifeboat.Cli.Core.Namespace.SubCommands;
 
-namespace ServiceBusLifeboat.Cli.Actions.Namespace.Commands;
+namespace ServiceBusLifeboat.Cli.Core.Namespace.Commands;
 
 public class NamespaceCommand : Command
 {
