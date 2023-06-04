@@ -1,4 +1,4 @@
-using ServiceBusLifeboat.Cli.GroupedConstants;
+using ServiceBusLifeboat.Cli.Enums;
 
 namespace ServiceBusLifeboat.Cli.Extensions;
 
@@ -15,13 +15,13 @@ public static class EnvironmentExtensions
     public static bool IsUnix()
     {
         string os = GetOperationalSystem();
-        return os.Contains(Constants.OperationalSystems.Unix);
+        return os.Contains(nameof(OperationalSystem.Unix));
     }
 
     public static bool IsWin32NT()
     {
         string os = GetOperationalSystem();
-        return os.Contains(Constants.OperationalSystems.Win32NT);
+        return os.Contains(nameof(OperationalSystem.Win32NT));
     }
 
     private static string GetOperationalSystem()
