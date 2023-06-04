@@ -17,7 +17,7 @@ public class ConfigurationService : IConfigurationService
         _logger = logger;
     }
 
-    public IFile ResolveConfigurationFile<T>() where T : IFile, new()
+    public IAppConfiguration? ResolveConfigurationFile<T>() where T : IAppConfiguration, new()
     {
         var fileName = new T().FileName;
         var folderName = ApplicationInformations.DefaultConfigurationFolder;
@@ -27,14 +27,14 @@ public class ConfigurationService : IConfigurationService
         {
             _logger.Information(ConfigurationServiceMessages.ConfigurationFileFound);
 
-            return _fileService.TryGetJsonFile<T>(filePath);
+            return _fileService.GetJsonFile<T>(filePath);
         }
         else
         {
             var configFile = new T();
             configFile.Path = filePath;
 
-            _fileService.CreateJsonFile<T>(filePath);
+            _fileService.CreateJsonFile(configFile, filePath);
 
             _logger.Information(ConfigurationServiceMessages.ConfigurationFileCreated);
 
@@ -42,7 +42,7 @@ public class ConfigurationService : IConfigurationService
         }
     }
 
-    public void UpdateConfigurationContent<T>(IFile configurationFile, string content) where T : IFile, new()
+    public void UpdateConfigurationContent<T>(IAppConfiguration? configurationFile, string content) where T : IAppConfiguration, new()
     {
         var fileName = configurationFile.FileName;
         var defaultConfigurationFolderName = ApplicationInformations.DefaultConfigurationFolder;
