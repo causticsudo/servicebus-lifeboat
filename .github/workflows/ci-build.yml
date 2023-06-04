@@ -90,7 +90,7 @@ jobs:
   # Publish windows-linux binaries unstable version
   publish-unstable:
     needs: build
-    if: needs.build.result == 'success' && needs.quality-gate.result != 'cancelled'
+    if: needs.build.result == 'success' && needs.quality-gate.result == 'success'
     runs-on: ubuntu-latest
     environment: unstable
 
