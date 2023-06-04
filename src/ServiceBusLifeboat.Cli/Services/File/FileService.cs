@@ -16,19 +16,19 @@ public class FileService : IFileService
         _logger = logger;
     }
 
-    public IFile TryGetJsonFile<T>(string filePath) where T : IFile, new()
+    public T? GetJsonFile<T>(string filePath) where T : IFile, new()
     {
-        T file;
+        T? file = default(T);
 
         if (FileAlreadyExists(filePath))
         {
             string configContent = System.IO.File.ReadAllText(filePath);
             file = JsonConvert.DeserializeObject<T>(configContent);
 
-            return file ?? throw new OperationCanceledException();
+            return file;
         }
 
-        throw new InvalidOperationException();
+        return file;
     }
 
     public bool IsMatchFileFound(string regexPattern, string filePath)
@@ -39,7 +39,7 @@ public class FileService : IFileService
         }
 
         string fileContent;
-        using (StreamReader reader = new StreamReader(filePath))
+        using (var reader = new StreamReader(filePath))
         {
             fileContent = reader.ReadToEnd();
         }
@@ -56,17 +56,17 @@ public class FileService : IFileService
         return Path.Combine(CurrentDomain.BaseDirectory, filePath);
     }
 
-    public void CreateJsonFile<T>(string filePath) where T : IFile, new()
+    public void CreateJsonFile(IFile? file, string filePath)
     {
         try
         {
-            var file = new T();
-            var serializedFile = JsonConvert.SerializeObject(file);
             var directory = Path.GetDirectoryName(filePath);
+            var serializedFile = JsonConvert.SerializeObject(file);
+
             Directory.CreateDirectory(directory ??
                                       throw new InvalidOperationException(FileServiceMessages.InvalidFilePath));
 
-            using (StreamWriter writer = new StreamWriter(filePath))
+            using (var writer = new StreamWriter(filePath))
             {
                 writer.Write(serializedFile);
             }
@@ -81,7 +81,7 @@ public class FileService : IFileService
         }
     }
 
-    public void UpdateJsonFile<T>(IFile file, string filePath) where T : IFile, new()
+    public void UpdateJsonFile<T>(IFile? file, string filePath) where T : IFile, new()
     {
         try
         {
@@ -90,7 +90,7 @@ public class FileService : IFileService
             Directory.CreateDirectory(directory ??
                                       throw new InvalidOperationException(FileServiceMessages.InvalidFilePath));
 
-            using (StreamWriter writer = new StreamWriter(filePath))
+            using (var writer = new StreamWriter(filePath))
             {
                 writer.Write(newSerializedFile);
             }

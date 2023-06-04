@@ -2,7 +2,9 @@ namespace ServiceBusLifeboat.Cli.Services.Token;
 
 public interface ITokenService
 {
-    private const int DefaultExpirationInMinutes = 1440;
+    protected const uint DefaultExpirationInMinutes = 1;
 
-    string GenerateToken(int expirationInMinutes = DefaultExpirationInMinutes);
+    string GenerateJwtTokenAndWriteFile(uint expirationInMinutes = DefaultExpirationInMinutes);
+    bool IsCurrentTokenOverdue(string? token);
+    string RescueCurrentToken(string tokenPath = null);
 }
