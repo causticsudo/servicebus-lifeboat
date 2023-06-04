@@ -34,7 +34,7 @@ public class CreateConnectionCommandHandler
     public async Task Handle(bool mustSave)
     {
         var currentToken = _tokenService.RescueCurrentToken();
-        var isValidToken = (!currentToken.IsNullOrWhiteSpace() && !_tokenService.IsCurrentTokenOverdue(currentToken))
+        var accessToken = (!currentToken.IsNullOrWhiteSpace() && !_tokenService.IsCurrentTokenOverdue(currentToken))
             ? currentToken
             : _tokenService.GenerateJwtTokenAndWriteFile();
 
@@ -48,7 +48,7 @@ public class CreateConnectionCommandHandler
             _configurationService.UpdateConfigurationContent<ConnectionState>(config, encryptString);
         }
 
-        // TryBuildServiceBusClient(connectionString);
+        TryBuildServiceBusClient(connectionString);
         // config.Content = connectionString.ToStringSafely();
     }
 
