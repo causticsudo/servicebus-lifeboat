@@ -7,6 +7,7 @@ using ServiceBusLifeboat.Cli.Extensions.Serilog;
 using ServiceBusLifeboat.Cli.PromptModels;
 using ServiceBusLifeboat.Cli.Services.Configuration;
 using ServiceBusLifeboat.Cli.Services.Configuration.Namespace;
+using ServiceBusLifeboat.Cli.Services.Token;
 using Sharprompt;
 
 namespace ServiceBusLifeboat.Cli.Core.Namespace.SubCommands;
@@ -18,21 +19,33 @@ public class CreateConnectionCommandHandler
 
     private readonly ILogger _logger;
     private readonly IConfigurationService _configurationService;
+    private readonly ITokenService _tokenService;
 
-    public CreateConnectionCommandHandler(ILogger logger, IConfigurationService configurationService)
+    public CreateConnectionCommandHandler(
+        ILogger logger,
+        IConfigurationService configurationService,
+        ITokenService tokenService)
     {
         _logger = logger;
         _configurationService = configurationService;
+        _tokenService = tokenService;
     }
 
     public async Task Handle(bool mustSave)
     {
+        var currentToken = _tokenService.RescueCurrentToken();
+        var isValidToken = (!currentToken.IsNullOrWhiteSpace() && !_tokenService.IsCurrentTokenOverdue(currentToken))
+            ? currentToken
+            : _tokenService.GenerateJwtTokenAndWriteFile();
+
         var config = _configurationService.ResolveConfigurationFile<ConnectionState>();
         var connectionString = Prompt.Bind<CreateConnectionPromptModel>().GetSecureString();
 
         using (var insecureString = connectionString)
         {
-            _configurationService.UpdateConfigurationContent<ConnectionState>(config, insecureString.ToStringSafely());
+            //ecrypt service(connecString, accessToken)
+            var encryptString = insecureString.ToStringSafely();
+            _configurationService.UpdateConfigurationContent<ConnectionState>(config, encryptString);
         }
 
         // TryBuildServiceBusClient(connectionString);
