@@ -1,15 +1,39 @@
-﻿using System.CommandLine;
+﻿using ServiceBusLifeboat.Cli.Extensions;
+using Microsoft.Extensions.DependencyInjection;
+using System.CommandLine;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace ServiceBusLifeboat.Cli;
 
 internal class Program
 {
-    private const string DefaultDescription = "A simple AzureServiceBus command line interface.";
-
     internal static async Task Main(String[] args)
     {
-        var rootCommand = new RootCommand(DefaultDescription);
+        IHost host = CreateHostBuilder(args).Build();
 
-        await rootCommand.InvokeAsync(args);
+        await host.Services
+             .BuildRootCommand()
+             .InvokeAsync(args);
+    }
+
+    internal static IHostBuilder CreateHostBuilder(string[] args)
+    {
+        return Host.CreateDefaultBuilder(args)
+            .ConfigureServices((_, services) =>
+            {
+                services.AddCommands();
+                services.AddCommandHandlers();
+                services.AddApplicationServices();
+
+                var loggerConfiguration = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Console();
+
+                var logger = loggerConfiguration.CreateLogger();
+
+                services.AddSingleton<Serilog.ILogger>(logger);
+                services.AddLogging(builder => builder.SetMinimumLevel(LogLevel.Debug).AddSerilog(logger));
+            })
+            .UseConsoleLifetime();
     }
 }

@@ -1,0 +1,63 @@
+name: Sonarcloud Analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      manual_approval:
+        description: 'Approval required'
+        required: true
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    env:
+      Unit_Tests_Working_Directory: ./tests/ServiceBusLifeboat.UnitTests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # - Approval flow --
+      - name: Manual Approval
+        if: github.event.inputs.manual_approval == 'true'
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: approval } = await github.actions.createOrUpdateApproval({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              event: 'APPROVE'
+            });
+            console.log('Approval created/updated:', approval);
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Install dotnet-sonarscanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: SonarCloud Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner begin /k:"causticsudo_servicebus-lifeboat" /d:sonar.login="${{ env.SONAR_TOKEN }}" /o:"servicebus-lifeboat" /d:sonar.host.url="https://sonarcloud.io"
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build and Test
+        run: |
+          dotnet build
+          dotnet test --collect:"XPlat Code Coverage" --settings ${{env.Unit_Tests_Working_Directory}}/coverlet.runsettings
+
+      - name: SonarCloud End
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner end /d:sonar.login="${{ env.SONAR_TOKEN }}"
