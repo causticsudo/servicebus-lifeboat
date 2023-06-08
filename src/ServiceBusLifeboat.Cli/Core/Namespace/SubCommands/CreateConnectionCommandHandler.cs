@@ -7,6 +7,7 @@ using ServiceBusLifeboat.Cli.Extensions.Serilog;
 using ServiceBusLifeboat.Cli.PromptModels;
 using ServiceBusLifeboat.Cli.Services.Configuration;
 using ServiceBusLifeboat.Cli.Services.Configuration.Namespace;
+using ServiceBusLifeboat.Cli.Services.Encryption;
 using ServiceBusLifeboat.Cli.Services.Token;
 using Sharprompt;
 
@@ -20,23 +21,24 @@ public class CreateConnectionCommandHandler
     private readonly ILogger _logger;
     private readonly IConfigurationService _configurationService;
     private readonly ITokenService _tokenService;
+    private readonly IEncryptionService _encryptionService;
 
     public CreateConnectionCommandHandler(
         ILogger logger,
         IConfigurationService configurationService,
-        ITokenService tokenService)
+        ITokenService tokenService,
+        IEncryptionService encryptionService)
     {
         _logger = logger;
         _configurationService = configurationService;
         _tokenService = tokenService;
+        _encryptionService = encryptionService;
     }
 
     public async Task Handle(bool mustSave)
     {
-        var currentToken = _tokenService.RescueCurrentToken();
-        var accessToken = (!currentToken.IsNullOrWhiteSpace() && !_tokenService.IsCurrentTokenOverdue(currentToken))
-            ? currentToken
-            : _tokenService.GenerateJwtTokenAndWriteFile();
+        var currentToken = _tokenService.RescueCurrentToken(out var isActiveToken);
+        var accessToken = (isActiveToken) ? currentToken : _tokenService.GenerateJwtTokenAndWriteFile();
 
         var config = _configurationService.ResolveConfigurationFile<ConnectionState>();
         var connectionString = Prompt.Bind<CreateConnectionPromptModel>().GetSecureString();

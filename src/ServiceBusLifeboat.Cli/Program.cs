@@ -18,17 +18,16 @@ internal class Program
              .InvokeAsync(args);
     }
 
-    internal static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
+    internal static IHostBuilder CreateHostBuilder(string[] args)
+    {
+        return Host.CreateDefaultBuilder(args)
             .ConfigureServices((_, services) =>
             {
                 services.AddCommands();
                 services.AddCommandHandlers();
-                services.AddServices();
+                services.AddApplicationServices();
 
-                var loggerConfiguration = new LoggerConfiguration()
-                    .MinimumLevel.Debug()
-                    .WriteTo.Console();
+                var loggerConfiguration = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.Console();
 
                 var logger = loggerConfiguration.CreateLogger();
 
@@ -36,4 +35,5 @@ internal class Program
                 services.AddLogging(builder => builder.SetMinimumLevel(LogLevel.Debug).AddSerilog(logger));
             })
             .UseConsoleLifetime();
+    }
 }

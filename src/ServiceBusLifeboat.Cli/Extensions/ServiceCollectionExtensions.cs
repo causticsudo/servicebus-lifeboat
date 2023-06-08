@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ServiceBusLifeboat.Cli.Core.Namespace.Commands;
 using ServiceBusLifeboat.Cli.Core.Namespace.SubCommands;
 using ServiceBusLifeboat.Cli.Services.Configuration;
+using ServiceBusLifeboat.Cli.Services.Encryption;
 using ServiceBusLifeboat.Cli.Services.File;
 using ServiceBusLifeboat.Cli.Services.NetworkInterface;
 using ServiceBusLifeboat.Cli.Services.Token;
@@ -23,11 +24,12 @@ public static class ServiceCollectionExtensions
         services.AddTransient<CreateConnectionCommandHandler>();
     }
 
-    public static void AddServices(this IServiceCollection services)
+    public static void AddApplicationServices(this IServiceCollection services)
     {
         services.AddSingleton<IFileService, FileService>();
         services.AddSingleton<INetworkInterfaceService, NetworkInterfaceService>();
         services.AddSingleton<ITokenService, TokenService>();
         services.AddSingleton<IConfigurationService, ConfigurationService>();
+        services.AddSingleton<IEncryptionService, EncryptionService>();
     }
 }
