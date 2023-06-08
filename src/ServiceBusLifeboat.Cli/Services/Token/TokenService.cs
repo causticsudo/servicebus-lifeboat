@@ -31,7 +31,7 @@ public class TokenService : ITokenService
         _logger = logger;
     }
 
-    public string RescueCurrentToken(string tokenPath = null)
+    public string RescueCurrentToken(out bool isActiveToken, string tokenPath = null)
     {
         var filePath = (tokenPath.IsNullOrWhiteSpace())
             ? _fileService.GetFilePath(DefaultConfigurationFolder, DefaultTokenFile)
@@ -42,6 +42,10 @@ public class TokenService : ITokenService
 
         if (tokenString.IsNullOrWhiteSpace())
         {
+            _logger.Warning(TokenConfigurationNotFound);
+
+            isActiveToken = false;
+
             return string.Empty;
         }
 
@@ -65,8 +69,12 @@ public class TokenService : ITokenService
         {
             _logger.Error(ex.Message, ex);
 
+            isActiveToken = false;
+
             return string.Empty;
         }
+
+        isActiveToken = validatedToken.ValidTo > DateTime.Now;
 
         return _jwtTokenHandler.WriteToken(validatedToken);
     }
@@ -121,7 +129,4 @@ public class TokenService : ITokenService
 
         return sha256.ComputeHash(Encoding.UTF8.GetBytes(combinedInfo));
     }
-
-    public bool IsCurrentTokenOverdue(string token) =>
-        _jwtTokenHandler.ReadToken(token).ValidTo < DateTime.Now;
 }

@@ -2,9 +2,8 @@ namespace ServiceBusLifeboat.Cli.Services.Token;
 
 public interface ITokenService
 {
-    protected const uint DefaultExpirationInMinutes = 1;
+    const uint DefaultExpirationInMinutes = 1;
 
     string GenerateJwtTokenAndWriteFile(uint expirationInMinutes = DefaultExpirationInMinutes);
-    bool IsCurrentTokenOverdue(string? token);
-    string RescueCurrentToken(string tokenPath = null);
+    string RescueCurrentToken(out bool isActiveToken, string tokenPath = null);
 }
